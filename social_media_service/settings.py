@@ -40,9 +40,9 @@ INSTALLED_APPS = [
     'social_media',
     'user',
     'rest_framework.authtoken',
-    "rest_framework",
-    "drf_spectacular",
-    "debug_toolbar",
+    'rest_framework',
+    'drf_spectacular',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -156,3 +156,8 @@ SPECTACULAR_SETTINGS = {
         "defaultModelExpandDepth": 2,
     },
 }
+
+# Celery settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_CACHE_BACKEND = 'default'

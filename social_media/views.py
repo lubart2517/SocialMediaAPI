@@ -1,15 +1,13 @@
-from datetime import datetime
 
-from django.db.models import F, Count
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from social_media.models import Profile, Post, PostLike
+from social_media.permissions import IsOwner
 
 from social_media.serializers import (
     ProfileSerializer,
@@ -33,7 +31,7 @@ class ProfileViewSet(
 ):
     queryset = Profile.objects
     serializer_class = ProfileDetailSerializer
-    #permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    permission_classes = (IsAuthenticated, IsOwner)
 
     @staticmethod
     def _params_to_ints(qs):
@@ -117,12 +115,13 @@ class ProfileViewSet(
 class PostViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
     queryset = Post.objects.prefetch_related("likes", "comments")
     serializer_class = PostListSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsOwner)
 
     @staticmethod
     def _params_to_ints(qs):

@@ -16,7 +16,9 @@ from social_media.serializers import (
 from social_media.models import UserFollowing, Profile, Post
 
 
-class LogoutView(APIView):
+class LogoutView(generics.GenericAPIView):
+    serializer_class = UserSerializer
+
     def get(self, request, format=None):
         # simply delete the token to force a login
         request.user.auth_token.delete()
@@ -49,7 +51,7 @@ class CreateUserFollowingView(generics.CreateAPIView):
         serializer.save(user_id=self.kwargs['pk'], following_user_id=self.request.user.id)
 
 
-class DeleteUserFollowingView(APIView):
+class DeleteUserFollowingView(generics.GenericAPIView):
     serializer_class = UserFollowingSerializer
     permission_classes = (IsAuthenticated,)
 
