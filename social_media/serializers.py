@@ -59,7 +59,13 @@ class PostLikeSerializer(serializers.ModelSerializer):
 class PostCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostComment
-        fields = ("user", "text")
+        fields = ("user", "text", "id")
+
+
+class PostCommentListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostComment
+        fields = ("user", "text", "id", "post")
 
 
 class PostCommentCreateSerializer(serializers.ModelSerializer):
@@ -68,18 +74,19 @@ class PostCommentCreateSerializer(serializers.ModelSerializer):
         fields = ("text",)
 
 
-class PostDetailSerializer(ProfileSerializer):
+class PostDetailSerializer(serializers.ModelSerializer):
     likes = PostLikeSerializer(many=True, read_only=True)
     comments = PostCommentSerializer(many=True, read_only=True)
+    seconds = serializers.IntegerField(required=False)
 
     class Meta:
         model = Post
         fields = (
-            "text", "title", "likes", "comments", "image"
+            "text", "title", "likes", "comments", "image", "seconds"
         )
 
 
-class PostListSerializer(ProfileSerializer):
+class PostListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post

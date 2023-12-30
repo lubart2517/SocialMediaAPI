@@ -6,8 +6,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from social_media.models import Profile, Post, PostLike
+from social_media.models import Profile, Post, PostLike, PostComment
 from social_media.permissions import IsOwner
+from social_media.tasks import post_create_delay
+from social_media_service.celery import debug_task
 
 from social_media.serializers import (
     ProfileSerializer,
@@ -18,7 +20,8 @@ from social_media.serializers import (
     PostDetailSerializer,
     PostListSerializer,
     PostImageSerializer,
-    PostCommentCreateSerializer
+    PostCommentCreateSerializer,
+    PostCommentListSerializer
 )
 
 
@@ -122,11 +125,6 @@ class PostViewSet(
     queryset = Post.objects.prefetch_related("likes", "comments")
     serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated, IsOwner)
-
-    @staticmethod
-    def _params_to_ints(qs):
-        """Converts a list of string IDs to a list of integers"""
-        return [int(str_id) for str_id in qs.split(",")]
 
     def get_queryset(self):
         """Retrieve the posts with filters"""
@@ -253,4 +251,31 @@ class PostViewSet(
         return super().list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        if serializer.validated_data.get("seconds") is not None:
+            post_create_delay.apply_async(
+                (serializer.validated_data, self.request.user.id),
+                countdown=serializer.validated_data.get("seconds")
+            )
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        else:
+            serializer.save(user=self.request.user)
+
+
+class PostCommentViewSet(
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = PostComment.objects.all()
+    serializer_class = PostCommentListSerializer
+    permission_classes = (IsOwner,)
+
+    def get_serializer_class(self):
+        if self.action == "update":
+            return PostCommentCreateSerializer
+
+        return PostCommentListSerializer
+
