@@ -9,11 +9,9 @@ from rest_framework.response import Response
 from social_media.models import Profile, Post, PostLike, PostComment
 from social_media.permissions import IsOwner
 from social_media.tasks import post_create_delay
-from social_media_service.celery import debug_task
 
 from social_media.serializers import (
     ProfileSerializer,
-    ProfileFollowerSerializer,
     ProfileDetailSerializer,
     ProfileListSerializer,
     ProfileImageSerializer,
@@ -80,8 +78,8 @@ class ProfileViewSet(
     )
     def upload_image(self, request, pk=None):
         """Endpoint for uploading image to specific profile"""
-        movie = self.get_object()
-        serializer = self.get_serializer(movie, data=request.data)
+        profile = self.get_object()
+        serializer = self.get_serializer(profile, data=request.data)
 
         if serializer.is_valid():
             serializer.save()

@@ -1,7 +1,6 @@
 import os
 import uuid
 
-from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.utils.text import slugify
 from django.db import models
@@ -10,8 +9,9 @@ from django.db import models
 def profile_image_file_path(instance, filename):
     _, extension = os.path.splitext(filename)
     filename = f"{slugify(instance.username)}-{uuid.uuid4()}{extension}"
+    path = os.path.join("uploads", "profiles")
 
-    return os.path.join("uploads/profiles/", filename)
+    return os.path.join(path, filename)
 
 
 class Profile(models.Model):
@@ -28,8 +28,8 @@ class Profile(models.Model):
 def post_image_file_path(instance, filename):
     _, extension = os.path.splitext(filename)
     filename = f"{slugify(instance.title)}-{uuid.uuid4()}{extension}"
-
-    return os.path.join("uploads/posts/", filename)
+    path = os.path.join("uploads", "posts")
+    return os.path.join(path, filename)
 
 
 class Post(models.Model):

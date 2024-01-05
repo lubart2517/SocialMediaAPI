@@ -11,6 +11,6 @@ router.register("profiles", ProfileViewSet)
 router.register("posts", PostViewSet)
 router.register("comments", PostCommentViewSet)
 
-urlpatterns = [path("", include(router.urls))]
+urlpatterns = [path("/", include(router.urls))]
 
 app_name = "social_media"
